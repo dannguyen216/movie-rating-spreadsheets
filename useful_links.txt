@@ -15,3 +15,9 @@ https://stackoverflow.com/questions/13197574/openpyxl-adjust-column-width-size
 
 _____OpenPyXL Check if Sheet Exists in Workbook_____
 https://stackoverflow.com/questions/37966536/python-validate-if-a-sheet-exists-in-my-document-xls
+
+_____OpenPyXL Cell Borders_____
+https://stackoverflow.com/questions/24917201/applying-borders-to-a-cell-in-openpyxl
+
+_____RGB Color Codes_____
+https://www.rapidtables.com/web/color/RGB_Color.html

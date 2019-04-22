@@ -1,4 +1,5 @@
 import openpyxl
+import sys
 from openpyxl.styles import Font, PatternFill, Alignment
 
 
@@ -9,69 +10,81 @@ def read_movie_input(input_file):
     movie_data_list = []
     with open(input_file, 'r') as file:
         for line in file.readlines():
-            movie_data = [s.strip() for s in line.split(';;;')]
-            movie_data_list.append(movie_data)
+            # Only append movie data if the line if the line has characters
+            # other than whitespaces.
+            if(line.strip()):
+                movie_data = [s.strip() for s in line.split(';;;')]
+                if(len(movie_data) == 3):
+                    movie_data_list.append(movie_data)
 
-    print(movie_data_list)
+
+    # print(movie_data_list)
     return movie_data_list
 
 
-def write_movie_data_to_spreadsheet(workbook, file_name, movie_data_list):
-    # The name of the file will be the name of the worksheet
-    '''
-    file_name = input_file.split('.')[0]
-    wb = openpyxl.Workbook()
-    wb.create_sheet(title=file_name)
-    movie_sheet = get_sheet_by_name(file_name)
-    '''
-    try:
-        worksheet = workbook.get_sheet_by_name(file_name)
+def write_column_names(worksheet):
+    light_red_cell_fill = PatternFill(fill_type='solid', start_color='FF9999', end_color='FF9999')
 
-    except:
-        workbook.active.title = file_name
-        worksheet = workbook.get_sheet_by_name(file_name)
-        worksheet['A1'].font = Font(size=20, bold=True, underline='single')
-        worksheet['A1'] = "Movie Title"
-        worksheet['A1'].alignment = Alignment(horizontal='center')
-        worksheet.column_dimensions['A'].width = 50
+    worksheet['A1'].font = Font(size=20, bold=True, underline='single')
+    worksheet['A1'] = "Movie Title"
+    worksheet['A1'].alignment = Alignment(horizontal='center')
+    worksheet['A1'].fill = light_red_cell_fill
+    worksheet.column_dimensions['A'].width = 50
 
-        worksheet['B1'].font = Font(size=20, bold=True, underline='single')
-        worksheet['B1'] = "Rating"
-        worksheet['B1'].alignment = Alignment(horizontal='center')
-        worksheet.column_dimensions['B'].width = 25
+    worksheet['B1'].font = Font(size=20, bold=True, underline='single')
+    worksheet['B1'] = "Rating"
+    worksheet['B1'].alignment = Alignment(horizontal='center')
+    worksheet['B1'].fill = light_red_cell_fill
+    worksheet.column_dimensions['B'].width = 25
 
-        worksheet['C1'].font = Font(size=20, bold=True, underline='single')
-        worksheet['C1'] = "Release Date"
-        worksheet['C1'].alignment = Alignment(horizontal='center')
-        worksheet.column_dimensions['C'].width = 25
+    worksheet['C1'].font = Font(size=20, bold=True, underline='single')
+    worksheet['C1'] = "Release Date"
+    worksheet['C1'].alignment = Alignment(horizontal='center')
+    worksheet['C1'].fill = light_red_cell_fill
+    worksheet.column_dimensions['C'].width = 25
+    
+    return
 
+
+def write_movie_data_to_spreadsheet(worksheet, movie_data_list):
+    row_num = 2
+    for movie_data in movie_data_list:
+        movie_title_cell = 'A' + str(row_num)
+    print(len(movie_data_list))
 
     return
 
 
 def main():
-    input_file = 'example_input.txt'
+    if len(sys.argv) != 2:
+        print("Usage: python movie_rating_sheets.py input_file")
+        return
+
+    input_file = sys.argv[1]
     file_name = input_file.split('.')[0]
 
     movie_data_list = read_movie_input(input_file)
 
     try:
         print('Loading Movie_Ratings workbook...')
-        wb = openpyxl.load_workbook('Movie_Ratings.xlsx')
+        workbook = openpyxl.load_workbook('Movie_Ratings.xlsx')
+        if file_name in workbook.sheetnames:
+            print('Spreadsheet of name \"%s\" already in workbook.' % file_name)
+            print('Exiting...')
+            return
+        else:
+            workbook.create_sheet(title=file_name)
+
     except FileNotFoundError:
         print('Movie ratings workbook not found in current directory...')
         print('Creating workbook file Movie_Ratings.xlsx...')
-        wb = openpyxl.Workbook()
+        workbook = openpyxl.Workbook()
+        workbook.active.title = file_name
         
-        '''
-        wb.active.title = file_name
-        sheet = wb.get_sheet_by_name(file_name)
-        sheet['A1'].font = Font(size=20, bold=True, underline='single')
-        sheet['A1'] = "Movie Title"
-        sheet['A1'].alignment = Alignment(horizontal='center')
-        sheet.column_dimensions['A'].width = 50
-        '''
-    write_movie_data_to_spreadsheet(wb, file_name, movie_data_list)
+    worksheet = workbook.get_sheet_by_name(file_name)
+    write_column_names(worksheet)
+    print('Writing data to worksheet %s...' % worksheet.title)
+    write_movie_data_to_spreadsheet(worksheet, movie_data_list)
     
     '''
     wb = openpyxl.load_workbook('example.xlsx')
@@ -91,7 +104,14 @@ def main():
     '''
 
     print('Saving changes to workbook...')
-    wb.save('Movie_Ratings.xlsx')
+    try:
+        workbook.save('Movie_Ratings.xlsx')
+        print('\nChanges saved successfully.')
+    except OSError:
+        print('\nFailed to save changes.')
+        print('Workbook Movie_Ratings.xlsx is busy.')
+        print('Confirm that the workbook is closed before running the script.')
+        print('Exiting...')
 
 
 
