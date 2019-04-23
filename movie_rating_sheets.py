@@ -4,6 +4,7 @@ import sys
 
 
 # Global variables for Worksheet styles
+# Cell colors
 LIGHT_RED_FILL = PatternFill(fill_type='solid',
                              start_color='FF9999',
                              end_color='FF9999')
@@ -23,20 +24,23 @@ GREEN_FILL = PatternFill(fill_type='solid',
                          start_color='00FF00',
                          end_color='00FF00')
 
+# Cell value alignment
 CENTER_ALIGN = Alignment(horizontal='center')
 
+# Font Styles
 COLUMN_TITLE_FONT = Font(size=20, bold=True, underline='single')
 BOLD_FONT = Font(bold=True)
 
+# Border Styles
 CELL_BORDER = Border(left=Side(border_style='thick'),
                      right=Side(border_style='thick'),
                      top=Side(border_style='thick'),
                      bottom=Side(border_style='thick'))
 
 
-# Reads an input file given by the user in a specific format and
-# returns a list of movies along with their corresponding rating
-# and release date.
+# Function that reads an input file given by the user in a specific
+# specific format and returns a list of movies along with their 
+# corresponding rating and release date.
 def read_movie_input(input_file):
     movie_data_list = []
     with open(input_file, 'r') as file:
@@ -52,23 +56,28 @@ def read_movie_input(input_file):
     return movie_data_list
 
 
+# Function used to write the titles for each column on the worksheet.
+# The three columns are:
+#    A.) Movie Title
+#    B.) Rating (A review score for the movie from 1 to 5)
+#    C.) Release Date of the movie
 def write_column_names(worksheet):
-    worksheet['A1'].font = COLUMN_TITLE_FONT
     worksheet['A1'] = "Movie Title"
+    worksheet['A1'].font = COLUMN_TITLE_FONT
     worksheet['A1'].alignment = CENTER_ALIGN
     worksheet['A1'].fill = LIGHT_RED_FILL
     worksheet['A1'].border = CELL_BORDER
     worksheet.column_dimensions['A'].width = 50
 
-    worksheet['B1'].font = COLUMN_TITLE_FONT
     worksheet['B1'] = "Rating"
+    worksheet['B1'].font = COLUMN_TITLE_FONT
     worksheet['B1'].alignment = CENTER_ALIGN
     worksheet['B1'].fill = LIGHT_RED_FILL
     worksheet['B1'].border = CELL_BORDER
     worksheet.column_dimensions['B'].width = 25
 
-    worksheet['C1'].font = COLUMN_TITLE_FONT
     worksheet['C1'] = "Release Date"
+    worksheet['C1'].font = COLUMN_TITLE_FONT
     worksheet['C1'].alignment = CENTER_ALIGN
     worksheet['C1'].fill = LIGHT_RED_FILL
     worksheet['C1'].border = CELL_BORDER
@@ -77,6 +86,9 @@ def write_column_names(worksheet):
     return
 
 
+# Function that takes the movie data read from the input file
+# and writes the data to the excel spreadsheet given as
+# a parameter.
 def write_movie_data_to_spreadsheet(worksheet, movie_data_list):
     row_num = 2
     for movie_data in movie_data_list:
@@ -111,6 +123,14 @@ def write_movie_data_to_spreadsheet(worksheet, movie_data_list):
     return
 
 
+# A helper function to the write_movie_data_to_spreadsheet
+# function that determines the color of each cell in the
+# ratings column, depending on what range the rating
+# falls under. The ratings are as follows:
+#    rating < 2: Red cell color (Bad movie)
+#    2 < rating < 3: Orange cell color (Mediocre Movie)
+#    rating = 3: Yellow cell color (Decent Movie)
+#    rating > 3: Green cell color (Good Movie)
 def get_rating_color(rating):
     if rating < 2:
         return RED_FILL
