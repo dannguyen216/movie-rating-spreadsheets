@@ -146,6 +146,10 @@ def get_rating_color(rating):
         return GREEN_FILL
 
 
+# Function that is called after writing data to the worksheet
+# After reading and parsing the movie ratings, the function writes 
+# the average rating to the cell below the last row of the table.
+# The average is rounded to the hundreths place (2 decmial places)
 def write_average_to_spreadsheet(worksheet):
     rating_value_string = 'LEFT(B2, SEARCH(\"/\", B2) - 1)'
     for cell in worksheet['B'][2:]:
@@ -171,6 +175,11 @@ def write_average_to_spreadsheet(worksheet):
 
 
 def main():
+    # Currently, the program only accepts a single command line argument
+    # in addition to movie_rating_sheets.py
+    # If the number of command line arguments is not correct, the
+    # correct usage format will be printed, and the program will
+    # stop running.
     if len(sys.argv) != 2:
         print("Usage: python movie_rating_sheets.py input_file")
         return
