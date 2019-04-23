@@ -1,5 +1,5 @@
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, colors
 import sys
 
 
@@ -12,17 +12,20 @@ LIGHT_BLUE_FILL = PatternFill(fill_type='solid',
                               start_color='CCCCFF',
                               end_color='CCCCFF')
 RED_FILL = PatternFill(fill_type='solid',
-                       start_color='FF0000',
-                       end_color='FF0000')
+                       start_color='FF6666',
+                       end_color='FF6666')
 ORANGE_FILL = PatternFill(fill_type='solid',
-                          start_color='FF8000',
-                          end_color='FF8000')
+                          start_color='FFB266',
+                          end_color='FFB266')
 YELLOW_FILL = PatternFill(fill_type='solid',
-                          start_color='FFFF00',
-                          end_color='FFFF00')
+                          start_color='FFFF66',
+                          end_color='FFFF66')
 GREEN_FILL = PatternFill(fill_type='solid',
-                         start_color='00FF00',
-                         end_color='00FF00')
+                         start_color='66FF66',
+                         end_color='66FF66')
+BLACK_FILL = PatternFill(fill_type='solid',
+                         start_color='000000',
+                         end_color='000000')
 
 # Cell value alignment
 CENTER_ALIGN = Alignment(horizontal='center')
@@ -30,6 +33,7 @@ CENTER_ALIGN = Alignment(horizontal='center')
 # Font Styles
 COLUMN_TITLE_FONT = Font(size=20, bold=True, underline='single')
 BOLD_FONT = Font(bold=True)
+AVERAGE_FONT = Font(bold=True,color=colors.WHITE)
 
 # Border Styles
 CELL_BORDER = Border(left=Side(border_style='thick'),
@@ -142,6 +146,30 @@ def get_rating_color(rating):
         return GREEN_FILL
 
 
+def write_average_to_spreadsheet(worksheet):
+    rating_value_string = 'LEFT(B2, SEARCH(\"/\", B2) - 1)'
+    for cell in worksheet['B'][2:]:
+        rating_value_string += ','
+        cell_string = cell.column + str(cell.row)
+        rating_value_string += 'LEFT({}, SEARCH(\"/\", {}) - 1)'.format(cell_string,
+                                                                        cell_string)
+
+    average_row = str(worksheet.max_row + 1)
+
+    label_cell = 'A' + average_row
+    worksheet[label_cell] = 'AVERAGE RATING'
+    worksheet[label_cell].font = AVERAGE_FONT
+    worksheet[label_cell].alignment = CENTER_ALIGN
+    worksheet[label_cell].fill = BLACK_FILL
+
+    average_cell = 'B' + average_row
+    worksheet[average_cell] = '=ROUND(AVERAGE({}), 2)'.format(rating_value_string)
+    worksheet[average_cell].font = AVERAGE_FONT
+    worksheet[average_cell].alignment = CENTER_ALIGN
+    worksheet[average_cell].fill = BLACK_FILL
+    return
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python movie_rating_sheets.py input_file")
@@ -152,36 +180,43 @@ def main():
 
     movie_data_list = read_movie_input(input_file)
 
-    try:
-        print('Loading Movie_Ratings workbook...')
-        workbook = openpyxl.load_workbook('Movie_Ratings.xlsx')
-        if file_name in workbook.sheetnames:
-            print('Spreadsheet of name \"%s\" already in workbook.' %
-                  file_name)
+    if len(movie_data_list) > 0:
+        try:
+            print('Loading Movie_Ratings workbook...')
+            workbook = openpyxl.load_workbook('Movie_Ratings.xlsx')
+            if file_name in workbook.sheetnames:
+                print('Spreadsheet of name \"%s\" already in workbook.' %
+                      file_name)
+                print('Exiting...')
+                return
+            else:
+                workbook.create_sheet(title=file_name)
+
+        except FileNotFoundError:
+            print('\nMovie ratings workbook not found in current directory.')
+            print('Creating workbook file Movie_Ratings.xlsx...')
+            workbook = openpyxl.Workbook()
+            workbook.active.title = file_name
+
+        worksheet = workbook.get_sheet_by_name(file_name)
+        write_column_names(worksheet)
+        print('\nWriting data to worksheet %s...' % worksheet.title)
+        write_movie_data_to_spreadsheet(worksheet, movie_data_list)
+
+        write_average_to_spreadsheet(worksheet)
+
+        print('Saving changes to workbook...')
+        try:
+            workbook.save('Movie_Ratings.xlsx')
+            print('\nChanges saved successfully.')
+        except OSError:
+            print('\nFailed to save changes.')
+            print('Workbook Movie_Ratings.xlsx is busy.')
+            print('Confirm that the workbook is closed before running the script.')
             print('Exiting...')
-            return
-        else:
-            workbook.create_sheet(title=file_name)
 
-    except FileNotFoundError:
-        print('\nMovie ratings workbook not found in current directory.')
-        print('Creating workbook file Movie_Ratings.xlsx...')
-        workbook = openpyxl.Workbook()
-        workbook.active.title = file_name
-
-    worksheet = workbook.get_sheet_by_name(file_name)
-    write_column_names(worksheet)
-    print('\nWriting data to worksheet %s...' % worksheet.title)
-    write_movie_data_to_spreadsheet(worksheet, movie_data_list)
-
-    print('Saving changes to workbook...')
-    try:
-        workbook.save('Movie_Ratings.xlsx')
-        print('\nChanges saved successfully.')
-    except OSError:
-        print('\nFailed to save changes.')
-        print('Workbook Movie_Ratings.xlsx is busy.')
-        print('Confirm that the workbook is closed before running the script.')
+    else:
+        print('No movie data obtained from input file %s' % input_file)
         print('Exiting...')
 
 
