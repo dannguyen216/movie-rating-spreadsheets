@@ -240,7 +240,7 @@ def main():
     # If the input file cannot be opened in the current directory,
     # notify the user and exit.
     except FileNotFoundError:
-        print('Input file \"%s\" not found in current directory.' % input_file)
+        print('\nInput file \"%s\" not found in current directory.' % input_file)
         print('Exiting...')
         return 1
 
@@ -255,7 +255,7 @@ def main():
             # exists, the file will not be overwritten and will
             # exit instead
             if file_name in workbook.sheetnames:
-                print('Spreadsheet of name \"%s\" already in workbook.' %
+                print('\nSpreadsheet of name \"%s\" already in workbook.' %
                       file_name)
                 print('Exiting...')
                 return 1
