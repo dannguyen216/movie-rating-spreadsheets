@@ -33,7 +33,7 @@ CENTER_ALIGN = Alignment(horizontal='center')
 # Font Styles
 COLUMN_TITLE_FONT = Font(size=20, bold=True, underline='single')
 BOLD_FONT = Font(bold=True)
-AVERAGE_FONT = Font(bold=True,color=colors.WHITE)
+AVERAGE_FONT = Font(bold=True, color=colors.WHITE)
 
 # Border Styles
 CELL_BORDER = Border(left=Side(border_style='thick'),
@@ -43,20 +43,27 @@ CELL_BORDER = Border(left=Side(border_style='thick'),
 
 
 # Function that reads an input file given by the user in a specific
-# specific format and returns a list of movies along with their 
+# specific format and returns a list of movies along with their
 # corresponding rating and release date.
+# Each element in the list will contain information in the following
+# format:
+# [Movie Title, Movie Rating, Release Date]
 def read_movie_input(input_file):
     movie_data_list = []
+    # Open the file and read it line by line
     with open(input_file, 'r') as file:
         for line in file.readlines():
             # Only append movie data if the line if the line has characters
             # other than whitespaces.
             if line.strip():
+                # Remove trailing whitespaces in the values and read
+                # in elements separated by three semicolons
                 movie_data = [s.strip() for s in line.split(';;;')]
+                # Valid data entries should have 3 elements in the list
+                # after parsing the line.
                 if len(movie_data) == 3:
                     movie_data_list.append(movie_data)
 
-    # print(movie_data_list)
     return movie_data_list
 
 
@@ -66,6 +73,7 @@ def read_movie_input(input_file):
 #    B.) Rating (A review score for the movie from 1 to 5)
 #    C.) Release Date of the movie
 def write_column_names(worksheet):
+    # Label the Movie Title column and edit the cell styles
     worksheet['A1'] = "Movie Title"
     worksheet['A1'].font = COLUMN_TITLE_FONT
     worksheet['A1'].alignment = CENTER_ALIGN
@@ -73,6 +81,7 @@ def write_column_names(worksheet):
     worksheet['A1'].border = CELL_BORDER
     worksheet.column_dimensions['A'].width = 50
 
+    # Label the Movie Rating column and edit the cell styles
     worksheet['B1'] = "Rating"
     worksheet['B1'].font = COLUMN_TITLE_FONT
     worksheet['B1'].alignment = CENTER_ALIGN
@@ -80,6 +89,7 @@ def write_column_names(worksheet):
     worksheet['B1'].border = CELL_BORDER
     worksheet.column_dimensions['B'].width = 25
 
+    # label the Release Date column and edit the cell styles
     worksheet['C1'] = "Release Date"
     worksheet['C1'].font = COLUMN_TITLE_FONT
     worksheet['C1'].alignment = CENTER_ALIGN
@@ -94,27 +104,47 @@ def write_column_names(worksheet):
 # and writes the data to the excel spreadsheet given as
 # a parameter.
 def write_movie_data_to_spreadsheet(worksheet, movie_data_list):
+    # The movie data begins on the second row of the spreadsheet
+    # (The first row contains the column titles)
     row_num = 2
+
+    # Iterate through each movie (and corresponding information)
+    # obtained from the input file
     for movie_data in movie_data_list:
+        # Each movie title will be written in the 'A' column
+        # in separate rows.
         movie_title = movie_data[0]
         movie_title_cell = 'A' + str(row_num)
         worksheet[movie_title_cell] = movie_title
+
+        # Movie Title cell style edits
         worksheet[movie_title_cell].font = BOLD_FONT
         worksheet[movie_title_cell].alignment = CENTER_ALIGN
         worksheet[movie_title_cell].fill = LIGHT_BLUE_FILL
         worksheet[movie_title_cell].border = CELL_BORDER
 
+        # Movie Ratings will be written to the 'B' column
         rating = movie_data[1]
         rating_cell = 'B' + str(row_num)
+        # On the spreadsheet, the rating will be written
+        # to the cell along with ' / 5' to signify
+        # the intended maximum score.
         worksheet[rating_cell] = '%s / 5' % rating
+
+        # Rating cell style edits
         worksheet[rating_cell].font = BOLD_FONT
         worksheet[rating_cell].alignment = CENTER_ALIGN
+        # In order to determine the color of the Movie Rating cell,
+        # a helper function get_rating_color is called.
         worksheet[rating_cell].fill = get_rating_color(float(rating))
         worksheet[rating_cell].border = CELL_BORDER
 
+        # Release Dates will be written to the 'C' column
         release_date = movie_data[2]
         date_cell = 'C' + str(row_num)
         worksheet[date_cell] = release_date
+
+        # Release Date cell style edits
         worksheet[date_cell].font = BOLD_FONT
         worksheet[date_cell].alignment = CENTER_ALIGN
         worksheet[date_cell].fill = LIGHT_BLUE_FILL
@@ -122,8 +152,6 @@ def write_movie_data_to_spreadsheet(worksheet, movie_data_list):
 
         row_num += 1
 
-    # print(len(movie_data_list))
-    # print('num rows: %d' % row_num)
     return
 
 
@@ -147,17 +175,25 @@ def get_rating_color(rating):
 
 
 # Function that is called after writing data to the worksheet
-# After reading and parsing the movie ratings, the function writes 
+# After reading and parsing the movie ratings, the function writes
 # the average rating to the cell below the last row of the table.
 # The average is rounded to the hundreths place (2 decmial places)
 def write_average_to_spreadsheet(worksheet):
-    rating_value_string = 'LEFT(B2, SEARCH(\"/\", B2) - 1)'
+    # The LEFT and SEARCH functions are used to parse the text in the
+    # 'B' column. The text in the Movie Ratings column is listed
+    # out of a maximum score of 5, and the Excel text functions
+    # are used to isolate the actual number score from the input file.
+    rating_string = 'LEFT(B2, SEARCH(\"/\", B2) - 1)'
     for cell in worksheet['B'][2:]:
-        rating_value_string += ','
+        # Each cell's value will be obtained from the Excel text
+        # funcitons and separated by commas.
+        rating_string += ','
         cell_string = cell.column + str(cell.row)
-        rating_value_string += 'LEFT({}, SEARCH(\"/\", {}) - 1)'.format(cell_string,
-                                                                        cell_string)
+        rating_string += 'LEFT({}, SEARCH(\"/\", {}) - 1)'.format(cell_string,
+                                                                  cell_string)
 
+    # The row that the average will be written to is immediately
+    # below the last row that the movie data was written to.
     average_row = str(worksheet.max_row + 1)
 
     label_cell = 'A' + average_row
@@ -167,7 +203,10 @@ def write_average_to_spreadsheet(worksheet):
     worksheet[label_cell].fill = BLACK_FILL
 
     average_cell = 'B' + average_row
-    worksheet[average_cell] = '=ROUND(AVERAGE({}), 2)'.format(rating_value_string)
+
+    # The average will be calculated from the values read from the cells
+    # and rounded to the hundreths place.
+    worksheet[average_cell] = '=ROUND(AVERAGE({}), 2)'.format(rating_string)
     worksheet[average_cell].font = AVERAGE_FONT
     worksheet[average_cell].alignment = CENTER_ALIGN
     worksheet[average_cell].fill = BLACK_FILL
@@ -181,52 +220,94 @@ def main():
     # correct usage format will be printed, and the program will
     # stop running.
     if len(sys.argv) != 2:
-        print("Usage: python movie_rating_sheets.py input_file")
-        return
+        print('Usage: python movie_rating_sheets.py input_file')
+        return 1
 
+    # The input file will be read from the command line
     input_file = sys.argv[1]
+
+    # The file name will exclude the file format to title the
+    # spreadsheet that will be created
     file_name = input_file.split('.')[0]
 
-    movie_data_list = read_movie_input(input_file)
+    # The movie information gained from the input file will be
+    # stored in a list
+    try:
+        movie_data_list = read_movie_input(input_file)
 
+    # If the input file cannot be opened in the current directory,
+    # notify the user and exit.
+    except FileNotFoundError:
+        print('Input file %s not found in current directory.' % input_file)
+        print('Exiting...')
+        return 1
+
+    # The spreadsheet will only be written if data was able to be obtained
+    # from the input file
     if len(movie_data_list) > 0:
         try:
+            # Attempt to load the workbook
             print('Loading Movie_Ratings workbook...')
             workbook = openpyxl.load_workbook('Movie_Ratings.xlsx')
+            # If a worksheet with the same name as the input file
+            # exists, the file will not be overwritten and will
+            # exit instead
             if file_name in workbook.sheetnames:
                 print('Spreadsheet of name \"%s\" already in workbook.' %
                       file_name)
                 print('Exiting...')
-                return
+                return 1
             else:
+                # Create a sheet with the same name as the input file
                 workbook.create_sheet(title=file_name)
 
         except FileNotFoundError:
+            # If Movie_Ratings.xlsx is not found in the current directory,
+            # the file will be created with a worksheet named after the input
+            # file
             print('\nMovie ratings workbook not found in current directory.')
             print('Creating workbook file Movie_Ratings.xlsx...')
             workbook = openpyxl.Workbook()
             workbook.active.title = file_name
 
+        # Create a worksheet with the same name as the input file
+        # and write the column titles to the worksheet
         worksheet = workbook.get_sheet_by_name(file_name)
         write_column_names(worksheet)
         print('\nWriting data to worksheet %s...' % worksheet.title)
+
+        # With the data from movie_data_list, write the movie information
+        # to the spreadsheet on separate rows
         write_movie_data_to_spreadsheet(worksheet, movie_data_list)
 
+        # Calculate the average rating and write the value to the cell
+        # below the movie data
         write_average_to_spreadsheet(worksheet)
 
+        # Attempt to save the changes to the workbook
         print('Saving changes to workbook...')
         try:
             workbook.save('Movie_Ratings.xlsx')
             print('\nChanges saved successfully.')
+
         except OSError:
+            # If the file is still open, changes cannot be saved.
+            # The user is notified, and the program exits.
             print('\nFailed to save changes.')
             print('Workbook Movie_Ratings.xlsx is busy.')
-            print('Confirm that the workbook is closed before running the script.')
+            print('Confirm that the workbook is closed before running' +
+                  'the script.')
             print('Exiting...')
+            return 1
 
+        return 0
+
+    # If none of the expected information was able to be obtained
+    # from the input file, notify the user and exit.
     else:
         print('No movie data obtained from input file %s' % input_file)
         print('Exiting...')
+        return 1
 
 
 if __name__ == '__main__':

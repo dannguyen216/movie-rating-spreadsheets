@@ -22,5 +22,8 @@ https://stackoverflow.com/questions/24917201/applying-borders-to-a-cell-in-openp
 _____Split Strings in Excel_____
 https://www.ablebits.com/office-addins-blog/2016/06/01/split-text-string-excel/
 
+_____FileNotFoundError in Python 2_____
+https://stackoverflow.com/questions/21367320/searching-for-equivalent-of-filenotfounderror-in-python-2
+
 _____RGB Color Codes_____
 https://www.rapidtables.com/web/color/RGB_Color.html
