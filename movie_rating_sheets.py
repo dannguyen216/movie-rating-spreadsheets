@@ -196,6 +196,8 @@ def write_average_to_spreadsheet(worksheet):
     # below the last row that the movie data was written to.
     average_row = str(worksheet.max_row + 1)
 
+    # The Average rating will be labeled in the 'A' column
+    # next to the average value
     label_cell = 'A' + average_row
     worksheet[label_cell] = 'AVERAGE RATING'
     worksheet[label_cell].font = AVERAGE_FONT
@@ -238,7 +240,7 @@ def main():
     # If the input file cannot be opened in the current directory,
     # notify the user and exit.
     except FileNotFoundError:
-        print('Input file %s not found in current directory.' % input_file)
+        print('Input file \"%s\" not found in current directory.' % input_file)
         print('Exiting...')
         return 1
 
@@ -296,7 +298,7 @@ def main():
             print('\nFailed to save changes.')
             print('Workbook Movie_Ratings.xlsx is busy.')
             print('Confirm that the workbook is closed before running' +
-                  'the script.')
+                  ' the script.')
             print('Exiting...')
             return 1
 
