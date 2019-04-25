@@ -59,7 +59,7 @@ The program is currently very simple in its implementation, and assumes that the
 I plan on working on fixing these limitations along with adding more features that come to mind as long, but at the very least, I wanted to have this basic version of the project posted.
 
 ## File Descriptions
-1. **movie_rating_sheets.py**: The main program that contains the code written for the project. The code is written for Python 3 and will not work with Python 2 in its current state. Additional comments in the code help to explain my approach.
+1. **movie_rating_sheets.py**: The main program that contains the code written for the project. The code is written using Python 3 and will not work with Python 2 in its current state. Additional comments in the code help to explain my approach.
 
 2. **Movie_Ratings.xlsx**: The workbook file that is created by **movie_rating_sheets.py** to contain the worksheets that are written.
 
