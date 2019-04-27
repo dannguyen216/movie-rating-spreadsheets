@@ -8,7 +8,7 @@ In addition to writing the information to a spreadsheet, the average rating scor
 The file was worked on with Python 3.4.5 and will not work with Python 2 in its current state.
 
 ## Goals of the Project
-After introducing myself to the OpenPyXL module, I wanted some experience implementing it in a program.
+After introducing myself to the OpenPyXL module, I wanted some experience implementing it in a program. I also wanted to keep track of the movies that I watch per year in a spreadsheet and keep track of what I thought of movies after I watched them to see if they ever change over time.
 
 ## Input File Format
 For the input file, the program expects a movie title, a rating (numerical review score) out of a maximum of 5 and the release date of the film. Each line of the input file should generally look like the following:
